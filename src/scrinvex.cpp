@@ -19,6 +19,7 @@ using namespace std;
 using namespace scrinvex;
 
 namespace scrinvex {
+    std::string UMI_TAG = "UB";  // default UMI tag
     unsigned int missingBC, missingUMI, skippedBC;
     unordered_map<string, unsigned long> intergenicCounts;
 }
@@ -29,6 +30,7 @@ int main(int argc, char* argv[])
     HelpFlag help(parser, "help", "Display this message and quit", {'h', "help"});
     Positional<string> gtfFile(parser, "gtf", "The input GTF file containing features to check the bam against");
     Positional<string> bamFile(parser, "bam", "The input SAM/BAM file containing reads to process");
+    ValueFlag<string> umiTag(parser, "umitag", "Two-letter BAM tag to use as the UMI (default: UB). Example: --umi-tag XM", {"umi-tag"});
     ValueFlag<string> outputPath(parser, "ouput", "Path to output file.  Default: {current directory}/{bam filename}.scrinvex.tsv", {'o', "output"});
     ValueFlag<string> barcodeFile(parser, "barcodes", "Path to filtered barcodes.tsv file from cellranger. Only barcodes listed in the file will be used. Default: All barcodes present in bam", {'b', "barcodes"});
     ValueFlag<unsigned int> mappingQualityThreshold(parser,"quality", "Set the lower bound on read quality for coverage counting. Reads below this quality are skipped. Default: 255", {'q', "quality"});
@@ -36,6 +38,12 @@ int main(int argc, char* argv[])
     try
     {
         parser.ParseCLI(argc, argv);
+        
+        if (umiTag) {
+            const string t = umiTag.Get();
+            if (t.size() != 2) throw ValidationError("UMI tag must be exactly 2 characters (e.g. UB, XM)");
+            UMI_TAG = t;
+        }
 
         if (!gtfFile) throw ValidationError("No GTF file provided");
         if (!bamFile) throw ValidationError("No BAM file provided");
@@ -194,7 +202,7 @@ int main(int argc, char* argv[])
         }
         
         if (missingUMI + missingBC)
-            cerr << "There were " << missingBC << " reads without a barcode (CB) and " << missingUMI << " reads without a UMI (UB)" << endl;
+            cerr << "There were " << missingBC << " reads without a barcode (CB) and " << missingUMI << " reads without a UMI (" << UMI_TAG << ")" << endl;
 
         if (skippedBC)
             cerr << "Skipped " << skippedBC << " reads with barcodes not listed in " << barcodeFile.Get() << endl;

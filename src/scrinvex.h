@@ -11,6 +11,7 @@
 
 #include <GTF.h>
 #include <BamReader.h>
+#include <string>
 
 using namespace rnaseqc;
 
@@ -45,7 +46,8 @@ namespace scrinvex {
     chrom getChrom(Alignment&, SeqLib::HeaderSequenceVector&);
 
     const std::size_t GENIC_ALIGNED_LENGTH = 0, EXONIC_ALIGNED_LENGTH = 1, INTRONS = 0, JUNCTIONS = 1, EXONS = 2, SENSE = 3, ANTISENSE = 4;
-    const std::string BARCODE_TAG = "CB", UMI_TAG = "UB", MISMATCH_TAG = "NM";
+    const std::string BARCODE_TAG = "CB", MISMATCH_TAG = "NM";
+    extern std::string UMI_TAG;
 
     extern unsigned int missingBC, missingUMI, skippedBC;
     extern std::unordered_map<std::string, unsigned long> intergenicCounts; //bc -> readcounts for intergenic reads
