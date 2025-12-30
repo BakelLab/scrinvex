@@ -1,0 +1,13 @@
+diff --git a/rle.h b/rle.h
+index 0d59484..4f8946d 100644
+--- a/rle.h
++++ b/rle.h
+@@ -30,7 +30,7 @@ extern "C" {
+  *** 43+3 codec ***
+  ******************/
+ 
+-const uint8_t rle_auxtab[8];
++extern const uint8_t rle_auxtab[8];
+ 
+ #define RLE_MIN_SPACE 18
+ #define rle_nptr(block) ((uint16_t*)(block))
