@@ -35,8 +35,8 @@ rnaseqc/rnaseqc.a:
 		ABI=$(ABI) \
 		PREFIX=$(PREFIX) \
 		CXX="$(CXX)" \
-		CXXFLAGS="$(CXXFLAGS) $(INCLUDE_DIRS)" \
-		LDFLAGS="$(LDFLAGS) $(LIBRARY_PATHS)"
+		INCLUDE_DIRS="-I$(PREFIX)/include -ISeqLib -ISeqLib/htslib/" \
+		CFLAGS="$(CXXFLAGS) -I$(PREFIX)/include -I."
 
 # SeqLib build rule
 rnaseqc/SeqLib/lib/libseqlib.a rnaseqc/SeqLib/lib/libhts.a:
