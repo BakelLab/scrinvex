@@ -1,37 +1,43 @@
-#Set inclusion paths here (if boost, bamtools, or args are installed outside your path)
-INCLUDE_DIRS=-Irnaseqc -Irnaseqc/src -Irnaseqc/SeqLib -Irnaseqc/SeqLib/htslib/
-#Set library paths here (if boost or bamtools are installed outside your path)
-LIBRARY_PATHS=
-#Set to 0 if you encounter linker errors regarding strings from the bamtools library
-ABI=1
-#Provide full paths here to .a archives for libraries which should be statically linked
-STATIC_LIBS=
-#List of remaining libraries that will be dynamically linked
-LIBS=-lboost_filesystem -lboost_regex -lboost_system -lz -llzma -lbz2 -lpthread
+# Allow Conda to pass in the prefix, default to /usr/local if not set
+PREFIX ?= /usr/local
 
-CC=g++
-STDLIB=-std=c++14
-CFLAGS=-Wall $(STDLIB) -D_GLIBCXX_USE_CXX11_ABI=$(ABI) -O3
-SOURCES=scrinvex.cpp
-SRCDIR=src
-OBJECTS=$(SOURCES:.cpp=.o)
-SEQFLAGS=$(STDLIB) -D_GLIBCXX_USE_CXX11_ABI=$(ABI)
+# --- THE FIX: Force inclusion of the Conda/System prefix ---
+INCLUDE_DIRS = -I$(PREFIX)/include -Irnaseqc -Irnaseqc/src -Irnaseqc/SeqLib -Irnaseqc/SeqLib/htslib/
+LIBRARY_PATHS = -L$(PREFIX)/lib
 
+# Standard library and flags
+ABI ?= 1
+CXX ?= g++
+STDLIB = -std=c++14
+# Use += to append to any flags passed from the environment
+CXXFLAGS += -Wall $(STDLIB) -D_GLIBCXX_USE_CXX11_ABI=$(ABI) -O3
+
+LIBS = -lboost_filesystem -lboost_regex -lboost_system -lz -llzma -lbz2 -lpthread
+
+SOURCES = scrinvex.cpp
+SRCDIR = src
+OBJECTS = $(SOURCES:.cpp=.o)
+
+# Final binary linking step
 scrinvex: $(foreach file,$(OBJECTS),$(SRCDIR)/$(file)) rnaseqc/rnaseqc.a rnaseqc/SeqLib/lib/libseqlib.a rnaseqc/SeqLib/lib/libhts.a
-	$(CC) -O3 $(LIBRARY_PATHS) -o $@ $^ $(STATIC_LIBS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LIBRARY_PATHS) -o $@ $^ $(LIBS)
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) -I. $(INCLUDE_DIRS) -c -o $@ $<
+# Compilation of source files to object files
+$(SRCDIR)/%.o: $(SRCDIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -I. $(INCLUDE_DIRS) -c -o $@ $<
 
+# SeqLib build rule
 rnaseqc/SeqLib/lib/libseqlib.a rnaseqc/SeqLib/lib/libhts.a:
-	cd rnaseqc/SeqLib && ./configure && make CXXFLAGS="$(SEQFLAGS)" && make install
+	cd rnaseqc/SeqLib && \
+	./configure --prefix=$(PREFIX) CPPFLAGS="-I$(PREFIX)/include" LDFLAGS="-L$(PREFIX)/lib" --with-bzip2 --with-lzma && \
+	make -j1 CXXFLAGS="$(CXXFLAGS) -I$(PREFIX)/include" && \
+	make install
 
 rnaseqc/rnaseqc.a:
 	cd rnaseqc && make lib ABI=$(ABI)
 
 .PHONY: clean
-
 clean:
-	rm $(wildcard $(SRCDIR)/*.o) || echo "Nothing to clean in scrinvex"
+	rm -f $(SRCDIR)/*.o scrinvex || echo "Nothing to clean in scrinvex"
 	cd rnaseqc && make clean || echo "Nothing to clean in RNA-SeQC"
 	cd rnaseqc/SeqLib && make clean || echo "Nothing to clean in SeqLib"
