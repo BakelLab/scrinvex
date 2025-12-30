@@ -29,14 +29,14 @@ scrinvex: $(foreach file,$(OBJECTS),$(SRCDIR)/$(file)) rnaseqc/rnaseqc.a rnaseqc
 $(SRCDIR)/%.o: $(SRCDIR)/%.cpp
 	$(CXX) $(CXXFLAGS) -I. $(INCLUDE_DIRS) -c -o $@ $<
 
-# RNA-SeQC core build rule (THE FIX)
-# We pass PREFIX, CXX, and CXXFLAGS to the sub-directory Makefile
+# RNA-SeQC core build rule
 rnaseqc/rnaseqc.a:
 	cd rnaseqc && $(MAKE) lib \
 		ABI=$(ABI) \
 		PREFIX=$(PREFIX) \
 		CXX="$(CXX)" \
-		CXXFLAGS="$(CXXFLAGS) -I$(PREFIX)/include"
+		CXXFLAGS="$(CXXFLAGS) $(INCLUDE_DIRS)" \
+		LDFLAGS="$(LDFLAGS) $(LIBRARY_PATHS)"
 
 # SeqLib build rule
 rnaseqc/SeqLib/lib/libseqlib.a rnaseqc/SeqLib/lib/libhts.a:
