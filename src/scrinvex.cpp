@@ -13,6 +13,7 @@
 #include <boost/filesystem.hpp>
 #include <Metrics.h>
 #include <Expression.h>
+#include <iomanip>
 
 using namespace args;
 using namespace std;
@@ -180,11 +181,11 @@ int main(int argc, char* argv[])
         // Drop all remaining genes to ensure their coverage data has been written
         for (auto contig : features) if (contig.second.size()) dropFeatures(contig.second, counts, output);
         output.close();
-        
+
         if (summaryFile)
         {
             ofstream summary(SUMMARYPATH);
-            summary << "barcode\tintrons\tjunctions\texons\tsense\tantisense\tintergenic" << endl;
+            summary << "barcode\tintrons\tjunctions\texons\tsense\tantisense\tintergenic\tnuc_frac_introns_only\tnuc_frac_introns_plus_junctions" << endl;
             set<string> barcodes;
             for (const string &barcode : summaryCounts.getBarcodes(barcodes))
             {
@@ -192,10 +193,18 @@ int main(int argc, char* argv[])
                 auto i = get<INTRONS>(data), j = get<JUNCTIONS>(data), e = get<EXONS>(data);
                 auto s = get<SENSE>(data), a = get<ANTISENSE>(data);
                 unsigned long n = intergenicCounts[barcode];
+
                 if (i + j + e + s + a + n > 0)
                 {
+                    const double denom = static_cast<double>(i + j + e);
+                    const double nf_introns_only = (denom > 0.0) ? static_cast<double>(i) / denom : 0.0;
+                    const double nf_introns_plus_junctions = (denom > 0.0) ? static_cast<double>(i + j) / denom : 0.0;
                     summary << barcode << "\t" << i;
-                    summary << "\t" << j << "\t" << e << "\t" << s << "\t" << a << "\t" << n << endl;
+                    summary << "\t" << j << "\t" << e << "\t" << s << "\t" << a << "\t" << n;
+                    summary << "\t" << std::fixed << std::setprecision(6)
+                            << nf_introns_only
+                            << "\t" << nf_introns_plus_junctions
+                            << endl;
                 }
             }
             summary.close();
