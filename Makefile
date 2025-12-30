@@ -12,7 +12,7 @@ STDLIB = -std=c++14
 CXXFLAGS += -Wall $(STDLIB) -D_GLIBCXX_USE_CXX11_ABI=$(ABI) -O3
 
 # 3. Libraries
-LIBS = -lboost_filesystem -lboost_regex -lboost_system -lz -llzma -lbz2 -lpthread
+LIBS = -lboost_filesystem -lboost_regex -lboost_system -lcurl -lcrypto -ldeflate -lz -llzma -lbz2 -lpthread
 
 # 4. Source Mapping
 SOURCES = scrinvex.cpp
