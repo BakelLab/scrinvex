@@ -19,8 +19,8 @@ export PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig:${PREFIX}/share/pkgconfig:${PKG_
 
 # Add include/lib paths + kseq guard everywhere
 export CPPFLAGS="-DHTSLIB_KSEQ_H -I${PREFIX}/include ${CPPFLAGS:-}"
-export CFLAGS="-DHTSLIB_KSEQ_H -I${PREFIX}/include ${CFLAGS:-}"
-export CXXFLAGS="-DHTSLIB_KSEQ_H -I${PREFIX}/include ${CXXFLAGS:-}"
+export CFLAGS="-fPIC -DHTSLIB_KSEQ_H -I${PREFIX}/include ${CFLAGS:-}"
+export CXXFLAGS="-fPIC -DHTSLIB_KSEQ_H -I${PREFIX}/include ${CXXFLAGS:-}"
 export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS:-}"
 
 # ---------------------------
@@ -60,7 +60,7 @@ pushd rnaseqc/SeqLib
 
 make -j"${CPU_COUNT}" \
   CXX="${CXX}" \
-  CXXFLAGS="-std=c++14 -D_GLIBCXX_USE_CXX11_ABI=1 ${CXXFLAGS}" \
+  CXXFLAGS="-std=gnu++14 -D_GLIBCXX_USE_CXX11_ABI=1 ${CXXFLAGS}" \
   LDFLAGS="${LDFLAGS}"
 
 make install
@@ -76,7 +76,7 @@ make lib -j"${CPU_COUNT}" \
   ABI=1 \
   CXX="${CXX}" \
   INCLUDE_DIRS="-I${PREFIX}/include -ISeqLib -ISeqLib/htslib/" \
-  CFLAGS="-Wall -std=c++14 -D_GLIBCXX_USE_CXX11_ABI=1 -O3 -I${PREFIX}/include"
+  CFLAGS="-fPIC -Wall -std=gnu++14 -D_GLIBCXX_USE_CXX11_ABI=1 -O3 -I${PREFIX}/include"
 
 popd
 
@@ -86,7 +86,7 @@ popd
 
 # Compile scrinvex.cpp with the Boost path
 "${CXX}" -c -o src/scrinvex.o src/scrinvex.cpp \
-  -std=c++14 -D_GLIBCXX_USE_CXX11_ABI=1 -O3 \
+  -fPIC -std=gnu++14 -D_GLIBCXX_USE_CXX11_ABI=1 -O3 \
   -DHTSLIB_KSEQ_H \
   -I. \
   -I"${PREFIX}/include" \
@@ -98,11 +98,9 @@ popd
   rnaseqc/rnaseqc.a \
   rnaseqc/SeqLib/lib/libseqlib.a \
   rnaseqc/SeqLib/htslib/libhts.a \
-  -L"${PREFIX}/lib" \
+  -fPIE -pie -L"${PREFIX}/lib" \
   -lboost_filesystem -lboost_regex -lboost_system \
-  -lcurl -lcrypto -ldeflate \
-  -lz -llzma -lbz2 \
-  -lpthread
+  -lcurl -lcrypto -ldeflate -lz -llzma -lbz2 -lpthread
 
 
 # ---------------------------

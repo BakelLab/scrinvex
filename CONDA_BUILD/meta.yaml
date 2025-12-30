@@ -9,7 +9,7 @@ source:
   git_url: https://github.com/BakelLab/scrinvex.git
 
 build:
-  number: 1
+  number: 2
   ignore_run_exports:
     - zlib
     - xz
@@ -45,7 +45,7 @@ requirements:
 
 test:
   commands:
-    - "scrinvex -h || [ $? -eq 4 ]"
+    - scrinvex -h || test $? -eq 4
 
 about:
   home: https://github.com/BakelLab/scrinvex
