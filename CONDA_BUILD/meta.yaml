@@ -1,0 +1,59 @@
+{% set name = "scrinvex" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  git_url: https://github.com/BakelLab/scrinvex.git
+
+build:
+  number: 1
+  ignore_run_exports:
+    - zlib
+    - xz
+    
+requirements:
+  build:
+    - {{ compiler('c') }} 
+    - {{ compiler('cxx') }}
+    - make
+    - cmake
+    - pkg-config
+    - autoconf
+    - automake
+    - git
+  host:
+    - boost-cpp
+    - libboost-devel
+    - zlib
+    - bzip2
+    - xz
+    - libdeflate
+    - libcurl
+    - openssl
+  run:
+    - boost-cpp
+    - libboost
+    - zlib
+    - bzip2
+    - xz
+    - libdeflate
+    - libcurl
+    - openssl
+
+test:
+  commands:
+    - "scrinvex -h || [ $? -eq 4 ]"
+
+about:
+  home: https://github.com/BakelLab/scrinvex
+  summary: "SCRINVEX - A Single Cell RNA-Seq QC tool"
+  description: |
+    SCRINVEX is a tool for Single Cell RNA-Seq Quality Control. 
+    This version is modified from the original version developed
+    by the Getz Lab (https://github.com/getzlab/scrinvex).
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
